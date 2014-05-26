@@ -3,8 +3,18 @@
 typedef enum
 {
   CROCODILE = 0x00,
+  ACORN,
   DIEHARD
 }structs_e;
+
+typedef enum
+{
+  ALIVE = 0x00,
+  DEAD,
+  ALWAYS_DEAD,
+  ALWAYS_ALIVE
+}cellState_e;
+
 int cells_board_init ( int x, int y );
 void cells_board_set_struct ( structs_e struct_, int x, int y );
 void cells_board_update ( void );

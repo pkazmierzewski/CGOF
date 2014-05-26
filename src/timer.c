@@ -15,7 +15,7 @@ lifeTimer_t* timer_init ( void )
 void timer_start ( lifeTimer_t* timer )
 {
   timer->started = TRUE;
-  timer->paused = TRUE;
+  timer->paused = FALSE;
   timer->start_ticks = SDL_GetTicks();
 }
 

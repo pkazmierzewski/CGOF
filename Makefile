@@ -1,6 +1,6 @@
 CC=gcc
 OBJ=objcopy
-CFLAGS=`pkg-config --cflags --libs glib-2.0` -c -O1 -Wall -std=c99 $(INCLUDES)
+CFLAGS=`pkg-config --cflags --libs glib-2.0` -c -O2 -Wall -std=c99 $(INCLUDES)
 LDFLAGS=
 LIBRARIES=-lSDL -lSDL_image -lSDL_ttf
 SOURCES=$(wildcard src/*.c)

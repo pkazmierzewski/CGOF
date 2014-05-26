@@ -1,13 +1,6 @@
 #include "debug.h"
 #include "cell.h"
 #include <stdlib.h>
-typedef enum
-{
-  ALIVE = 0x00,
-  DEAD,
-  ALWAYS_DEAD,
-  ALWAYS_ALIVE
-}cellState_e;
 
 typedef struct
 {
@@ -21,6 +14,7 @@ int x_max;
 int y_max;
 
 static void put_diehard ( int x, int y );
+static void put_acorn ( int x, int y );
 static void put_crocodile ( int x, int y );
 static void swap_cell ( int x, int y );
 static void check_cell ( int x, int y );
@@ -54,9 +48,40 @@ void cells_board_set_struct ( structs_e struct_, int x, int y )
       break;
     case DIEHARD:
       put_diehard ( x, y );
+      break;
+    case ACORN:
+      put_acorn ( x, y );
+      break;
     default:
       break;
   }
+}
+
+static void put_acorn ( int x, int y )
+{
+  board[x][y].state = DEAD;
+  board[x+1][y].state = ALIVE;
+  board[x+2][y].state = DEAD;
+  board[x+3][y].state = DEAD;
+  board[x+4][y].state = DEAD;
+  board[x+5][y].state = DEAD;
+  board[x+6][y].state = DEAD;
+
+  board[x][y+1].state = DEAD;
+  board[x+1][y+1].state = DEAD;
+  board[x+2][y+1].state = DEAD;
+  board[x+3][y+1].state = ALIVE;
+  board[x+4][y+1].state = DEAD;
+  board[x+5][y+1].state = DEAD;
+  board[x+6][y+1].state = DEAD;
+
+  board[x][y+2].state = ALIVE;
+  board[x+1][y+2].state = ALIVE;
+  board[x+2][y+2].state = DEAD;
+  board[x+3][y+2].state = DEAD;
+  board[x+4][y+2].state = ALIVE;
+  board[x+5][y+2].state = ALIVE;
+  board[x+6][y+2].state = ALIVE;
 }
 
 static void put_diehard ( int x, int y )
@@ -104,6 +129,7 @@ static void swap_cell ( int x, int y )
   if ( board[x][y].swap_state == 1 )
   {
     board[x][y].state = board[x][y].state == DEAD ? ALIVE : DEAD;
+    board[x][y].swap_state = 0;
   }
 }
 
@@ -130,34 +156,40 @@ static void check_cell ( int x, int y )
   if ( board[x][y].state == DEAD )
   {
     for (int i=loc_x; i<loc_x+3; i++)
+    {
       for ( int j=loc_y; j<loc_y+3; j++ )
       {
         if (i == x && j == y )
           continue;
-        if ( board[x][y].state == ALIVE || board[x][y].state == ALWAYS_ALIVE )
+        else if ( board[i][j].state == ALIVE || board[i][j].state == ALWAYS_ALIVE )
           cont++;
-        if (cont >= 3)
-        {
-          board[x][y].swap_state = 1;
-          return;
-        }
       }
+    }
+    if ( cont ==  3 )
+    {
+      /*LIFE_DBG ( "CELL %d, %d Resurrects!", x, y );*/
+      board[x][y].swap_state = 1;
+    }
   }
   else
   {
     for (int i=loc_x; i<loc_x+3; i++)
+    {
       for ( int j=loc_y; j<loc_y+3; j++ )
       {
         if (i == x && j == y )
           continue;
-        if ( board[x][y].state == ALIVE || board[x][y].state == ALWAYS_ALIVE )
+        else if ( board[i][j].state == ALIVE || board[i][j].state == ALWAYS_ALIVE )
           cont++;
-        if ( !(cont ==  3||cont == 2) )
-        {
-          board[x][y].swap_state = 1;
-          return;
-        }
       }
+    }
+    if ( !(cont ==  3||cont == 2) )
+    {
+      /*LIFE_DBG ( "CELL %d, %d DIES!", x, y );*/
+      /*LIFE_DBG ( "Cont is %d", cont );*/
+      board[x][y].swap_state = 1;
+      return;
+    }
   }
 }
 

@@ -2,6 +2,7 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "app.h"
 #include "debug.h"
 #include "common.h"
@@ -12,13 +13,13 @@ const int SCREEN_WIDTH = 100;
 const int SCREEN_HEIGHT = 100;
 const int SCREEN_BPP = 32;
 
-bool_e init(void)
+bool_e init( int x, int y )
 {
   /* */
   if(SDL_Init(SDL_INIT_EVERYTHING) == -1) return FALSE;
 
   /* */
-  screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE);
+  screen = SDL_SetVideoMode( x, y, SCREEN_BPP, SDL_SWSURFACE);
 
   /* */
   if(screen == NULL) return FALSE;
@@ -45,8 +46,15 @@ bool_e init(void)
  *}
  */
 
-int main ( int argc,char** argv)
+int main ( int argc, char** argv )
 {
-  init ( );
+  if ( argc < 3 )
+  {
+    LIFE_DBG ( "To few arguments!" );
+    exit ( 1 );
+  }
+  int x = atoi ( argv[1] );
+  int y = atoi ( argv[2] );
+  init ( x, y );
   run_app ( screen );
 }

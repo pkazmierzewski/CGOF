@@ -8,7 +8,7 @@
 #define FRAMES_PER_SECOND 60
 
 const int delay = 1000/FRAMES_PER_SECOND;
-void main_loop ( void );
+void main_loop ( SDL_Surface* surface );
 lifeTimer_t* fps;
 lifeTimer_t* timer;
 SDL_Surface* screen;
@@ -49,21 +49,22 @@ void clean_up ( void )
 void run_app ( SDL_Surface* surface )
 {
   screen = surface;
-  cells_board_init ( 100, 100 );
-  cells_board_set_struct ( DIEHARD, 50, 50 );
+  cells_board_init ( surface->w, surface->h );
+  cells_board_set_struct ( ACORN, surface->w/2, surface->h/2 );
   fps = timer_init ( );
   timer = timer_init ( );
-  main_loop ( );
+  main_loop ( surface );
   clean_up ( );
 }
 
-void put_pixel32 ( SDL_Surface *surface, int x, int y, Uint32 pixel )
+void put_pixel32 ( SDL_Surface* surface, int x, int y, Uint32 pixel )
 {
   //Convert the pixels to 32 bit
   Uint32 *pixels = (Uint32 *)surface->pixels;
   //Set the pixel
   pixels[ ( y * surface->w ) + x ] = pixel;
 }
+
 int saturate (int val, int saturation)
 {
   if (val > saturation)
@@ -73,22 +74,38 @@ int saturate (int val, int saturation)
   return val;
 }
 
-void main_loop ( void )
+void main_loop ( SDL_Surface* surface )
 {
   SDL_Event event;
   uint8_t* key_states;
   bool_e quit = FALSE;
-  int coords [2] = {400, 300};
+  /*int coords [2] = {400, 300};*/
   bool_e pressed = FALSE;
   int cont = 0;
+  int color = 0;
+  int prev_color = 256;
+  for (int i=0; i<surface->w; i++)
+  {
+    for (int j=0; j<surface->h; j++)
+    {
+      color = cells_board_get_color ( i, j );
+      if ( cells_board_get_state ( i, j ) )
+        color = 255;
+      else
+        color = 0;
+      cells_board_set_color ( i, j, color );
+      put_pixel32 ( screen, i, j, color<<16 );
+    }
+  }
+  SDL_Flip(screen);
   while ( quit == FALSE )
   {
+    timer_start ( fps );
     while ( SDL_PollEvent ( &event ) )
     {
       if ( event.type == SDL_QUIT )
         quit = TRUE;
     }
-    key_states = SDL_GetKeyState ( NULL );
     /*
      *if ( key_states [ SDLK_UP ] )
      *{
@@ -122,33 +139,40 @@ void main_loop ( void )
      *  pressed = FALSE;
      *}
      */
-    int color;
-    timer_start ( timer );
-    if ( cont++%255 == 0 )
+
+    if ( cont++%12 == 0 )
     {
       cells_board_update ( );
       LIFE_DBG ("update");
     }
-    for (int i=0; i<100; i++)
+    for (int i=0; i<surface->w; i++)
     {
-      for (int j=0; j<100; j++)
+      for (int j=0; j<surface->h; j++)
       {
         color = cells_board_get_color ( i, j );
         if ( cells_board_get_state ( i, j ) )
         {
-          color++;
-          color =  color > 255 ? 255 : color;
+          color += 21;
+          color = color > 255 ? 255 : color;
         }
         else
         {
-          color--;
-          color =  color < 0 ? 0 : color;
+          color -= 21;
+          color = color < 0 ? 0 : color;
         }
-        cells_board_set_color ( i, j, color );
-        put_pixel32 ( screen, i, j, color<<16 );
+        /*if ( !(prev_color == color) )*/
+        /*{*/
+          prev_color = color;
+          cells_board_set_color ( i, j, color );
+          put_pixel32 ( screen, i, j, color<<16 );
+        /*}*/
       }
     }
     SDL_Flip(screen);
-    SDL_Delay ( delay - timer_get_ticks ( fps ) );
+    LIFE_DBG ( "timer: %d", timer_get_ticks ( fps ) );
+    if ( delay < timer_get_ticks ( fps ))
+      SDL_Delay ( 0 );
+    else
+      SDL_Delay ( delay - timer_get_ticks ( fps ) );
   }
-} 
+}
