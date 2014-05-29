@@ -1,3 +1,6 @@
+#ifndef TIMER_H_
+#define TIMER_H_
+
 #include "common.h"
 
 typedef struct
@@ -16,3 +19,5 @@ void timer_resume ( lifeTimer_t* timer );
 int timer_get_ticks ( lifeTimer_t* timer );
 bool_e timer_is_started ( lifeTimer_t* timer );
 bool_e timer_is_paused ( lifeTimer_t* timer );
+
+#endif
