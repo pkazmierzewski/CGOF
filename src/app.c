@@ -77,10 +77,7 @@ int saturate (int val, int saturation)
 void main_loop ( SDL_Surface* surface )
 {
   SDL_Event event;
-  uint8_t* key_states;
   bool_e quit = FALSE;
-  /*int coords [2] = {400, 300};*/
-  bool_e pressed = FALSE;
   int cont = 0;
   int color = 0;
   int prev_color = 256;
