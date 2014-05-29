@@ -140,7 +140,7 @@ void main_loop ( SDL_Surface* surface )
      *}
      */
 
-    if ( cont++%12 == 0 )
+    if ( cont++%5 == 0 )
     {
       cells_board_update ( );
       LIFE_DBG ("update");
@@ -150,22 +150,23 @@ void main_loop ( SDL_Surface* surface )
       for (int j=0; j<surface->h; j++)
       {
         color = cells_board_get_color ( i, j );
+        prev_color = color;
         if ( cells_board_get_state ( i, j ) )
         {
-          color += 21;
-          color = color > 255 ? 255 : color;
+          color += 51;
+          color = color >= 255 ? 255 : color;
         }
         else
         {
-          color -= 21;
-          color = color < 0 ? 0 : color;
+          color -= 51;
+          color = color <= 0 ? 0 : color;
         }
-        /*if ( !(prev_color == color) )*/
-        /*{*/
+        if ( !(prev_color == color) )
+        {
           prev_color = color;
           cells_board_set_color ( i, j, color );
-          put_pixel32 ( screen, i, j, color<<16 );
-        /*}*/
+          put_pixel32 ( screen, i, j, color );
+        }
       }
     }
     SDL_Flip(screen);
